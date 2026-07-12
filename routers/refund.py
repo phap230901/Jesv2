@@ -178,6 +178,15 @@ def approve_refund(refund_id: int, db: Session = Depends(get_db)):
     req.reviewed_at = datetime.utcnow()
     db.commit()
 
+    # Gửi thông báo tới khách
+    _send_refund_notify(
+        db, req.license_key,
+        title="✅ Yêu cầu hoàn credit được duyệt",
+        message=f"Yêu cầu hoàn credit cho ảnh '{req.filename}' đã được chấp thuận. "
+                f"{req.credits_amount} credit đã được hoàn vào tài khoản của bạn.",
+        ntype="success",
+    )
+
     return {
         "ok":                True,
         "refund_id":         refund_id,
@@ -203,6 +212,15 @@ def reject_refund(refund_id: int, body: RejectBody, db: Session = Depends(get_db
     req.reviewed_at = datetime.utcnow()
     db.commit()
 
+    # Gửi thông báo tới khách
+    _send_refund_notify(
+        db, req.license_key,
+        title="❌ Yêu cầu hoàn credit không được duyệt",
+        message=f"Yêu cầu hoàn credit cho ảnh '{req.filename}' đã bị từ chối. "
+                f"Lý do: {body.admin_note.strip()}",
+        ntype="warning",
+    )
+
     return {
         "ok":       True,
         "refund_id": refund_id,
@@ -211,6 +229,22 @@ def reject_refund(refund_id: int, body: RejectBody, db: Session = Depends(get_db
 
 
 # ── Helper ────────────────────────────────────────────────────
+
+def _send_refund_notify(db, license_key: str,
+                        title: str, message: str, ntype: str = "info"):
+    """Tạo thông báo trong bảng notifications để khách nhận qua chuông."""
+    try:
+        from routers.notify import Notification
+        n = Notification(
+            title=f"[{license_key[:12]}] {title}",
+            message=message,
+            type=ntype,
+        )
+        db.add(n)
+        db.commit()
+    except Exception as e:
+        print(f"[refund notify] {e}")
+
 
 def _fmt(r: RefundRequest) -> dict:
     return {
