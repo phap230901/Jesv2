@@ -80,13 +80,14 @@ def submit_refund(body: RefundRequestBody, db: Session = Depends(get_db)):
     if key_obj.is_revoked:
         raise HTTPException(403, "Key đã bị thu hồi")
 
-    # Tránh spam: 1 ảnh chỉ được gửi 1 yêu cầu refund
+    # Chỉ chặn nếu đang có yêu cầu pending — cho phép gửi lại sau khi đã được duyệt/từ chối
     existing = db.query(RefundRequest).filter_by(
         license_key=body.key,
         filename=body.filename,
+        status="pending",
     ).first()
     if existing:
-        raise HTTPException(400, f"Ảnh '{body.filename}' đã có yêu cầu refund (trạng thái: {existing.status})")
+        raise HTTPException(400, f"Ảnh '{body.filename}' đang có yêu cầu chờ duyệt. Vui lòng chờ admin xử lý.")
 
     req = RefundRequest(
         license_key    = body.key,
