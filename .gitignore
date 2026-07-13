@@ -1,0 +1,40 @@
+# === Desktop app files — KHÔNG cần trên server (repo này chỉ deploy backend) ===
+ui.py
+workers.py
+auth_client.py
+license_window.py
+settings_window.py
+themes.py
+db.py
+prompts.py
+services.py
+admin_app.py
+app_config.py
+make_icon.py
+icon.ico
+app.spec
+app.py
+updater.py
+notification_widget.py
+refund_dialog.py
+DES_Admin.spec
+
+# === Legacy backend layout — đã dời lên root routers/ services/ ===
+backend_deploy/
+
+# === Build artifacts ===
+build/
+dist/
+dist.zip
+__pycache__/
+*.spec
+*.zip
+logo/
+
+# === Runtime data — không push lên git ===
+queue.db
+config.json
+logs/
+output/
+*.log
+.env
