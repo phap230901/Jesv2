@@ -38,3 +38,6 @@ logs/
 output/
 *.log
 .env
+
+# === Nested reference clone of anthropic/skills (own .git, not tracked here) ===
+.claude/skills-repo/
